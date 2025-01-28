@@ -4,9 +4,6 @@ def filtrado_de_columnas (df, dias_semana):
     # Necesitamos tratar el input dias_semana
     dias_semana = dias_semana.replace("/", "-")
 
-    # Formatear el objeto datetime al nuevo formato
-    dias_semana = datetime.strftime(dias_semana, "%d-%m-%Y")
-
     # Usar .str.contains() para identificar las columnas que cumplen la condición
     mascara = df.columns.str.contains(dias_semana)
     indices_columnas = [i for i, flag in enumerate(mascara) if flag]
@@ -21,6 +18,9 @@ def obtencion_datos (df, indices_columnas):
 
     # Creamos un contador para poder indicar en que indice del df colocaremos los datos
     contador = 0
+
+    Contador_index = 0 # Creamos este contador para corroborar la cantidad de asesores que trabajan los dias no habiles
+
     # Recorremos toda la columna para ver que valores no son nulos y en caso de encontrar un valor no nulo, obtenemos el id del asesor
     for index in df.index:
 
@@ -33,12 +33,14 @@ def obtencion_datos (df, indices_columnas):
             avaya = df.loc[index, 'Avaya']
             horario = df.iloc[index, indices_columnas[0]]
             print(f"Fila {index}: ID del asesor = {avaya}")
+            Contador_index = Contador_index + 1
             contador = contador + 1
 
             # Agregamos los datos al df
             df_borrar.loc[contador, "Id Avaya"] = avaya
             df_borrar.loc[contador, "Horarios"] = horario
         
+    print(Contador_index)
     return df_borrar
 
             

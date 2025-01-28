@@ -11,7 +11,7 @@ from config import Config
 
 def main(fecha_str, entry_archivo):
     # convertimos ese dato en fecha
-    fecha = datetime.strptime(fecha_str.get(),"%Y/%m/%d")
+    fecha = datetime.strptime(fecha_str.get(),"%d-%m-%Y")
 
     # Creamos una lista vacia para poder almacenar las fechas que necesitamos
     dias_semana = []
@@ -20,7 +20,7 @@ def main(fecha_str, entry_archivo):
     dias_semana.append(fecha_str.get())
     for i in range(1, 7):
         dia = fecha + timedelta(days=i)
-        dia = dia.strftime("%Y/%m/%d")
+        dia = dia.strftime("%d-%m-%Y")
         dias_semana.append(dia)
     
     # Hacemos global la variable dias semana
@@ -73,6 +73,7 @@ def main(fecha_str, entry_archivo):
                     horarios_list = Config.horarios_list
 
                     colocacion_horarios(horario_borrar, horarios_list, m)
+                    
         
     
     # Repetimos le mismo procedimiento pero con dias_semana[1]
@@ -101,7 +102,7 @@ def main(fecha_str, entry_archivo):
     df = pd.DataFrame(matriz, columns=Config.columns)
 
     # Exportamos los datos a excel
-    df.to_excel(f"{entry_archivo.get()}.xlsx",engine="openpyxl", index=False)
+    df.to_excel(f"{Config.ruta_salida}{entry_archivo.get()}.xlsx",engine="openpyxl", index=False)
     if df.to_excel:
         mx.showinfo("Exportacion exitosa", f"El documento se exporto exitosamente. {entry_archivo.get()}")
 
@@ -174,7 +175,7 @@ frame_fecha = ctk.CTkFrame(ventana_principal)
 frame_fecha.pack(pady=5, padx=5, fill = "both")
 label_fecha = ctk.CTkLabel(frame_fecha, text="Ingrese la fecha del dia sabado", font=("Helvetica", 14))
 label_fecha.pack(pady=5, padx=5)
-fecha = ctk.CTkEntry(frame_fecha, placeholder_text="YYYY/mm/dd")
+fecha = ctk.CTkEntry(frame_fecha, placeholder_text="DD/MM/YYYY")
 fecha.pack(pady=5, padx=5)
 
 # nombre archivo resultado
