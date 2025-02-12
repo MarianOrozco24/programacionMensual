@@ -203,6 +203,27 @@ def colocacion_horarios(horario, horarios_list, m):
         index_inicial =37
         index_final = 51
         m[index_inicial : index_final] = 1
+    elif horario == horarios_list[31]: # 8 a 14 vacaciones
+        index_inicial =25
+        index_final = 37
+        m[index_inicial : index_final] = "A"
+    elif horario == horarios_list[32]: # 8 a 14 Vacaciones
+        index_inicial =25
+        index_final = 37
+        m[index_inicial : index_final] = "A"
+    elif horario == horarios_list[33]: # 8 a 14 VACACIONES
+        index_inicial =25
+        index_final = 37
+        m[index_inicial : index_final] = "A"
+
+    elif horario == horarios_list[21]: # 9 a 19
+        index_inicial =27
+        index_final = 41
+        m[index_inicial : index_final] = 1
+        
+
+    else:
+        print(f"No se cargo el asesor {m[7]} - {horario}")
 
 
 

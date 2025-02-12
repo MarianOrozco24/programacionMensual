@@ -8,6 +8,9 @@ from procesamiento_progra.preparacion_df_inicial import repeticion_valores
 from procesamiento_progra.colocacion_unos import colocacion_horarios
 from procesamiento_progra.preparacion_dnh import filtrado_de_columnas, obtencion_datos
 from config import Config
+import time
+from PIL import Image
+
 
 def main(fecha_str, entry_archivo):
     # convertimos ese dato en fecha
@@ -52,54 +55,66 @@ def main(fecha_str, entry_archivo):
 
             # Ejecutamos la funcion que coloca los unos dependiendo el horario
             colocacion_horarios(m[8], horarios_list, m)
+  
+
     
-    # ---- Preparamos le dnh para la extraccion de datos ---- #
-    df_dnh = pd.read_excel(Config.ruta_dnh)
+    # Establecemos que si el interruptorr esta encendido que se ejecute las funciones que completan con el DNH
+    if Config.condicional_dnh == 0:
+          
+        # ---- Preparamos le dnh para la extraccion de datos ---- #
+        df_dnh = pd.read_excel(Config.ruta_dnh)
 
-    indices_columnas = filtrado_de_columnas(df_dnh, dias_semana[0])
-    df_borrar = obtencion_datos(df_dnh, indices_columnas)
-
-    # Recorremos la progra
-    for m in matriz:
-        
-        # Condicional para que solamente me filtre solamente los dias no habiles
-        if m[0] == dias_semana[0]:
-
-            # Recorremos el df_borrar comparando los id 
-            for index_borrar in df_borrar.index:
-                
-                if m[5] == df_borrar.loc[index_borrar, "Id Avaya"]:
-                    horario_borrar = df_borrar.loc[index_borrar, "Horarios"]
-                    horarios_list = Config.horarios_list
-
-                    colocacion_horarios(horario_borrar, horarios_list, m)
-                    
-        
+        # Procesamiento de DNH
+        indices_columnas = filtrado_de_columnas(df_dnh, dias_semana[0])
+        df_borrar = obtencion_datos(df_dnh, indices_columnas)
     
-    # Repetimos le mismo procedimiento pero con dias_semana[1]
-    indices_columnas = filtrado_de_columnas(df_dnh, dias_semana[1])
-    df_borrar = obtencion_datos(df_dnh, indices_columnas)
+        # Recorremos la progra
+        for m in matriz:
+            
+            # Condicional para que solamente me filtre solamente los dias no habiles
+            if m[0] == dias_semana[0]:
 
-    # Recorremos la progra
-    for m in matriz:
-        
-        # Condicional para que solamente me filtre solamente los dias no habiles
-        if m[0] == dias_semana[1]:
-
-            # Recorremos el df_borrar comparando los id 
-            for index_borrar in df_borrar.index:
-                
-                if m[5] == df_borrar.loc[index_borrar, "Id Avaya"]:
+                # Recorremos el df_borrar comparando los id 
+                for index_borrar in df_borrar.index:
                     
-                    # Creamos variables
-                    horario_borrar = df_borrar.loc[index_borrar, "Horarios"]
-                    horarios_list = Config.horarios_list
-                    colocacion_horarios(horario_borrar, horarios_list, m)
+                    if m[5] == df_borrar.loc[index_borrar, "Id Avaya"]:
+                        horario_borrar = df_borrar.loc[index_borrar, "Horarios"]
+                        horarios_list = Config.horarios_list
+                        colocacion_horarios(horario_borrar, horarios_list, m)
+                        
+            
+        
+        # Repetimos le mismo procedimiento pero con dias_semana[1]
+        indices_columnas = filtrado_de_columnas(df_dnh, dias_semana[1])
+        df_borrar = obtencion_datos(df_dnh, indices_columnas)
+
+        # Recorremos la progra
+        for m in matriz:
+            
+            # Condicional para que solamente me filtre solamente los dias no habiles
+            if m[0] == dias_semana[1]:
+
+                # Recorremos el df_borrar comparando los id 
+                for index_borrar in df_borrar.index:
+                    
+                    if m[5] == df_borrar.loc[index_borrar, "Id Avaya"]:
+
+                        # Creamos variables
+                        horario_borrar = df_borrar.loc[index_borrar, "Horarios"]
+                        horarios_list = Config.horarios_list
+                        colocacion_horarios(horario_borrar, horarios_list, m)
 
 
     # Convertimos en dataframe una vez procesados los datos
     columns=["Fecha", "Lider", "PCRC","#Skill", "Plataforma", "ID", "DNI", "Nombre y Apellido","Horario",  "0:00", "0:30", "1:00", "1:30", "2:00", "2:30", "3:00", "3:30", "4:00", "4:30", "5:00", "5:30", "6:00", "6:30", "7:00", "7:30", "8:00", "8:30", "9:00", "9:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00", "22:30","23:00", "23:30"]
     df = pd.DataFrame(matriz, columns=Config.columns)
+
+    # Invertimos las fechas para cumplir con el requerido
+    df["Fecha"] = pd.to_datetime(df["Fecha"], format="%d-%m-%Y")
+
+    
+    # Convertir a string con el formato deseado 
+    df['Fecha'] = df['Fecha'].dt.strftime('%Y-%m-%d')
 
     # Exportamos los datos a excel
     df.to_excel(f"{Config.ruta_salida}{entry_archivo.get()}.xlsx",engine="openpyxl", index=False)
@@ -107,11 +122,42 @@ def main(fecha_str, entry_archivo):
         mx.showinfo("Exportacion exitosa", f"El documento se exporto exitosamente. {entry_archivo.get()}")
 
 
+
+# Funciones para abrir archivos
+def abrir_archivo_dotacion():
+    Config.ruta_dotacion = filedialog.askopenfilename(
+        title="Selecciona un archivo",
+        filetypes=[("Todos los archivos", "*.txt"), ("Todos los archivos", "*.*")]
+    )
+    if Config.ruta_dotacion:
+        label_ruta_dotacion.configure(text=f"Archivo seleccionado:\n{Config.ruta_dotacion}")
+
+
+def abrir_archivo_dnh():
+    Config.ruta_dnh = filedialog.askopenfilename(
+        title="Selecciona un archivo",
+        filetypes=[("Todos los archivos", "*.txt"), ("Todos los archivos", "*.*")]
+    )
+    if Config.ruta_dnh:
+        label_ruta_dnh.configure(text=f"Archivo seleccionado:\n{Config.ruta_dnh}")
+
+
+# Función para manejar el interruptor
+def condicional_interuptor():
+    if switch_var.get() == 1:
+        label.configure(text="Sin DNH")
+        Config.condicional_dnh = 1
+    else:
+        label.configure(text="Con DNH")
+        Config.condicional_dnh = 0
+
+
+
 # Creacion de ventana principal
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 ventana_principal = ctk.CTk()
-ventana_principal.geometry("550x600")
+ventana_principal.geometry("550x650")
 ventana_principal.title("Ventana Principal")
 
 # Creamos un frame
@@ -122,6 +168,8 @@ frame_title.pack(pady=5, padx=5, fill ="both")
 title_label = ctk.CTkLabel( frame_title, text="Automatizacion Progra", font=("Helvetica", 20, "bold"))
 title_label.pack(pady=15, padx=5)
 
+
+
 def abrir_archivo_dotacion():
     Config.ruta_dotacion = filedialog.askopenfilename(
         title="Selecciona un archivo",
@@ -129,6 +177,7 @@ def abrir_archivo_dotacion():
     )
     if Config.ruta_dotacion:
         label_ruta_dotacion.configure(text=f"Archivo seleccionado:\n{Config.ruta_dotacion}")
+
 
 def abrir_archivo_dnh():
     Config.ruta_dnh = filedialog.askopenfilename(
@@ -138,44 +187,58 @@ def abrir_archivo_dnh():
     if Config.ruta_dnh:
         label_ruta_dnh.configure(text=f"Archivo seleccionado:\n{Config.ruta_dnh}")
 
+
+
+# interruptor para realizar proga con o sin dnh
+def condicional_interuptor():
+    if switch_var.get() == 1:
+        label.configure(text="Sin DNH")
+        Config.condicional_dnh = 1
+
+    else:
+        label.configure(text="Con DNH")
+        Config.condicional_dnh = 0
+
+
+
 # Label dotacion
 frame_dotacion = ctk.CTkFrame(ventana_principal)
 frame_dotacion.pack(pady=5, padx=5, fill = "both")
-label_dotacion = ctk.CTkLabel(frame_dotacion, text="Seleccione el archivo de la dotacion", font=("Helvetica", 14))
-label_dotacion.pack(pady=5, padx=5)
+# label_dotacion = ctk.CTkLabel(frame_dotacion, text="Seleccione el archivo de la dotacion", font=("Helvetica", 14))
+# label_dotacion.pack(pady=5, padx=5)
+
 
 # Boton para abrir el explorador de archivos
-frame_boton = ctk.CTkFrame(frame_dotacion,fg_color="#2d2d2d")
-frame_boton.pack(pady=5, padx=2)
-explorardor = ctk.CTkButton(frame_boton, text="Seleccionar archivo", command=abrir_archivo_dotacion)
-explorardor.pack(pady=1, padx=1)
+
+explorardor = ctk.CTkButton(frame_dotacion, text="Seleccionar dotacion", corner_radius=50, command=abrir_archivo_dotacion)
+explorardor.pack(pady=5, padx=1)
 
 # Etiqueta para mostrar la ruta del archivo seleccionado
 label_ruta_dotacion = ctk.CTkLabel(frame_dotacion, text="Archivo seleccionado: Ninguno")
 label_ruta_dotacion.pack(pady=5)
 
-# frame_seleccionar_dnh
-frame_dnh = ctk.CTkFrame(ventana_principal)
-frame_dnh.pack(pady=5, padx=5, fill = "both")
-label_dnh = ctk.CTkLabel(frame_dnh, text="Seleccione el archivo del dnh", font=("Helvetica", 14))
-label_dnh.pack(pady=5, padx=5)
 
-# Boton para abrir el explorador de archivos
-frame_boton = ctk.CTkFrame(frame_dnh,fg_color="#2d2d2d")
-frame_boton.pack(pady=5, padx=2)
-explorardor = ctk.CTkButton(frame_boton, text="Seleccionar archivo", command=abrir_archivo_dnh)
-explorardor.pack(pady=1, padx=1)
+
+        # frame_seleccionar_dnh
+frame_dnh = ctk.CTkFrame(ventana_principal)
+frame_dnh.pack( padx=5, pady=5, fill ="both")  # Usar pack(para el frame
+
+
+explorardor_dnh = ctk.CTkButton(frame_dnh, text="Seleccionar DNH", corner_radius=50, command=abrir_archivo_dnh)
+explorardor_dnh.pack(pady=5, padx=1)
+
 
 # Etiqueta para mostrar la ruta del archivo seleccionado
 label_ruta_dnh = ctk.CTkLabel(frame_dnh, text="Archivo seleccionado: Ninguno")
 label_ruta_dnh.pack(pady=5)
+
 
 # Indicar fecha
 frame_fecha = ctk.CTkFrame(ventana_principal)
 frame_fecha.pack(pady=5, padx=5, fill = "both")
 label_fecha = ctk.CTkLabel(frame_fecha, text="Ingrese la fecha del dia sabado", font=("Helvetica", 14))
 label_fecha.pack(pady=5, padx=5)
-fecha = ctk.CTkEntry(frame_fecha, placeholder_text="DD/MM/YYYY")
+fecha = ctk.CTkEntry(frame_fecha, placeholder_text="DD-MM-YYYY")
 fecha.pack(pady=5, padx=5)
 
 # nombre archivo resultado
@@ -185,6 +248,19 @@ label_archivo = ctk.CTkLabel(frame_archivo, text="Coloque el nombre del archivo 
 label_archivo.pack(pady=5, padx=5)
 entry_archivo = ctk.CTkEntry(frame_archivo, placeholder_text=".xlsx" )
 entry_archivo.pack(pady=5, padx=5)
+
+# Variable asociada al interruptor
+switch_var = ctk.IntVar()
+
+# Crear interruptor
+frame_interruptor =ctk.CTkFrame(ventana_principal)
+frame_interruptor.pack(pady=5, padx=5)
+switch = ctk.CTkSwitch(frame_interruptor, text=None, variable=switch_var, command=condicional_interuptor, onvalue=0, offvalue=1)
+switch.pack(pady=2, side="left")
+
+# Etiqueta para mostrar el estado
+label = ctk.CTkLabel(frame_interruptor, text="Con DNH", width=150, height=30)
+label.pack(pady=2)
 
 
 # boton cotinuar
