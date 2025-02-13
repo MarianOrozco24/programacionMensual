@@ -56,6 +56,7 @@ def procesamiento_dotacion (fecha_input, dotacion, dimensionamiento):
 
         # Recorremos el dataframe df_borrar buscando los asesores que tengan en su horario "vacaciones"
         for x in df_borrar.index:
+
             if df_borrar.loc[x, "Horarios"] == "vacaciones" or df_borrar.loc[x, "Horarios"] == " vacaciones" or df_borrar.loc[x, "Horarios"] == "vacaciones " :
                 avaya_borrar = df_borrar.loc[x, "Id Avaya"]
                 contador += 1
@@ -69,7 +70,14 @@ def procesamiento_dotacion (fecha_input, dotacion, dimensionamiento):
         mx.showerror("Procesamiento Domingo", f"Se produjo un error al intentar procesar la dotacion:\n {e} ")
 
     print("Cantidad de asesores de vacaciones: ",contador)
-
+    ## Hay que arreglar los PCRC
+    for index in df_dotacion.index:
+        if df_dotacion.loc[index, "SKILL"] == 861:
+            df_dotacion.loc[index, "PCRC"] = "CONTROL CARGA FIJA"
+            df_dotacion.loc[index, "LIDER"] = Config.lider_BO
+        elif df_dotacion.loc[index, "SKILL"] == 1160:
+            df_dotacion.loc[index, "PCRC"] = "CLOOPERS"
+            df_dotacion.loc[index, "LIDER"] = Config.coordinador_operacion
     return df_dotacion
 
     # Dia Domingo
