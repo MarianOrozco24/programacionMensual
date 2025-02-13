@@ -7,12 +7,17 @@ from tkinter import messagebox as mx
 from procesamiento_progra.preparacion_df_inicial import repeticion_valores
 from procesamiento_progra.colocacion_unos import colocacion_horarios
 from procesamiento_progra.preparacion_dnh import filtrado_de_columnas, obtencion_datos
+from procesamiento_dotacion.procesamiento_dotacion import procesamiento_dotacion
 from config import Config
 import time
 from PIL import Image
 
 
 def main(fecha_str, entry_archivo):
+    # Primero que nada vamos a procesar la dotacion para que no haya problemas con las vacaciones de los asesores
+
+    dota = procesamiento_dotacion(fecha_str.get(),Config.ruta_dotacion, Config.ruta_dnh )
+
     # convertimos ese dato en fecha
     fecha = datetime.strptime(fecha_str.get(),"%d-%m-%Y")
 
@@ -31,7 +36,7 @@ def main(fecha_str, entry_archivo):
     print(dias_semana)
 
     # Creamos un df con el excel importado
-    dota = pd.read_excel(Config.ruta_dotacion, usecols=["PROVEEDOR", "DNI", "NOMBRE Y APELLIDO Asesor" ,"LOG ID AVAYA", "SKILL", "PCRC", "LIDER", "HORARIO"])
+    # dota = pd.read_excel(Config.ruta_dotacion, usecols=["PROVEEDOR", "DNI", "NOMBRE Y APELLIDO Asesor" ,"LOG ID AVAYA", "SKILL", "PCRC", "LIDER", "HORARIO"])
 
     # Convertimos los datos a una matriz de numpy
     data = dota.to_numpy()
@@ -55,12 +60,15 @@ def main(fecha_str, entry_archivo):
 
             # Ejecutamos la funcion que coloca los unos dependiendo el horario
             colocacion_horarios(m[8], horarios_list, m)
+
   
 
     
     # Establecemos que si el interruptorr esta encendido que se ejecute las funciones que completan con el DNH
     if Config.condicional_dnh == 0:
           
+
+        
         # ---- Preparamos le dnh para la extraccion de datos ---- #
         df_dnh = pd.read_excel(Config.ruta_dnh)
 
@@ -80,7 +88,7 @@ def main(fecha_str, entry_archivo):
                     if m[5] == df_borrar.loc[index_borrar, "Id Avaya"]:
                         horario_borrar = df_borrar.loc[index_borrar, "Horarios"]
                         horarios_list = Config.horarios_list
-                        colocacion_horarios(horario_borrar, horarios_list, m)
+                        colocacion_horarios(horario_borrar, Config.horarios_list_DNH, m)
                         
             
         
@@ -102,7 +110,7 @@ def main(fecha_str, entry_archivo):
                         # Creamos variables
                         horario_borrar = df_borrar.loc[index_borrar, "Horarios"]
                         horarios_list = Config.horarios_list
-                        colocacion_horarios(horario_borrar, horarios_list, m)
+                        colocacion_horarios(horario_borrar, Config.horarios_list_DNH, m)
 
 
     # Convertimos en dataframe una vez procesados los datos
@@ -162,7 +170,7 @@ ventana_principal.title("Ventana Principal")
 
 # Creamos un frame
 frame_title = ctk.CTkFrame(ventana_principal)
-frame_title.pack(pady=5, padx=5, fill ="both")
+frame_title.pack(pady=25, padx=5, fill ="both")
 
 # Creacion de titulo
 title_label = ctk.CTkLabel( frame_title, text="Automatizacion Progra", font=("Helvetica", 20, "bold"))
@@ -202,72 +210,71 @@ def condicional_interuptor():
 
 
 # Label dotacion
-frame_dotacion = ctk.CTkFrame(ventana_principal)
-frame_dotacion.pack(pady=5, padx=5, fill = "both")
+frame_dotacion = ctk.CTkFrame(ventana_principal, fg_color="#6A0DAD")
+frame_dotacion.pack(pady=5, padx=5)
 # label_dotacion = ctk.CTkLabel(frame_dotacion, text="Seleccione el archivo de la dotacion", font=("Helvetica", 14))
 # label_dotacion.pack(pady=5, padx=5)
 
 
 # Boton para abrir el explorador de archivos
 
-explorardor = ctk.CTkButton(frame_dotacion, text="Seleccionar dotacion", corner_radius=50, command=abrir_archivo_dotacion)
-explorardor.pack(pady=5, padx=1)
+explorardor = ctk.CTkButton(frame_dotacion, text="Seleccionar dotacion",fg_color="#2C2F33", command=abrir_archivo_dotacion)
+explorardor.pack(pady=2, padx=2)
 
 # Etiqueta para mostrar la ruta del archivo seleccionado
-label_ruta_dotacion = ctk.CTkLabel(frame_dotacion, text="Archivo seleccionado: Ninguno")
+label_ruta_dotacion = ctk.CTkLabel(ventana_principal, text="Archivo seleccionado: Ninguno")
 label_ruta_dotacion.pack(pady=5)
 
 
 
         # frame_seleccionar_dnh
-frame_dnh = ctk.CTkFrame(ventana_principal)
-frame_dnh.pack( padx=5, pady=5, fill ="both")  # Usar pack(para el frame
+frame_dnh = ctk.CTkFrame(ventana_principal, fg_color="#6A0DAD")
+frame_dnh.pack( padx=5, pady=5)  # Usar pack(para el frame
 
 
-explorardor_dnh = ctk.CTkButton(frame_dnh, text="Seleccionar DNH", corner_radius=50, command=abrir_archivo_dnh)
-explorardor_dnh.pack(pady=5, padx=1)
+explorardor_dnh = ctk.CTkButton(frame_dnh, text="Seleccionar DNH",fg_color="#2C2F33", command=abrir_archivo_dnh)
+explorardor_dnh.pack(pady=2, padx=1)
 
 
 # Etiqueta para mostrar la ruta del archivo seleccionado
-label_ruta_dnh = ctk.CTkLabel(frame_dnh, text="Archivo seleccionado: Ninguno")
+label_ruta_dnh = ctk.CTkLabel(ventana_principal, text="Archivo seleccionado: Ninguno")
 label_ruta_dnh.pack(pady=5)
 
 
 # Indicar fecha
-frame_fecha = ctk.CTkFrame(ventana_principal)
-frame_fecha.pack(pady=5, padx=5, fill = "both")
-label_fecha = ctk.CTkLabel(frame_fecha, text="Ingrese la fecha del dia sabado", font=("Helvetica", 14))
+label_fecha = ctk.CTkLabel(ventana_principal, text="Ingrese la fecha del dia sabado", font=("Helvetica", 14))
 label_fecha.pack(pady=5, padx=5)
+frame_fecha = ctk.CTkFrame(ventana_principal, fg_color="#C9A000")
+frame_fecha.pack(pady=5, padx=5)
 fecha = ctk.CTkEntry(frame_fecha, placeholder_text="DD-MM-YYYY")
-fecha.pack(pady=5, padx=5)
+fecha.pack(pady=2, padx=2)
 
 # nombre archivo resultado
-frame_archivo = ctk.CTkFrame(ventana_principal)
-frame_archivo.pack(pady=5, padx=5, fill = "both")
-label_archivo = ctk.CTkLabel(frame_archivo, text="Coloque el nombre del archivo final", font=("Helvetica", 14))
+label_archivo = ctk.CTkLabel(ventana_principal, text="Coloque el nombre del archivo final", font=("Helvetica", 14))
 label_archivo.pack(pady=5, padx=5)
+frame_archivo = ctk.CTkFrame(ventana_principal, fg_color="#C9A000")
+frame_archivo.pack(pady=5, padx=5)
 entry_archivo = ctk.CTkEntry(frame_archivo, placeholder_text=".xlsx" )
-entry_archivo.pack(pady=5, padx=5)
+entry_archivo.pack(pady=2, padx=2)
 
 # Variable asociada al interruptor
 switch_var = ctk.IntVar()
 
 # Crear interruptor
-frame_interruptor =ctk.CTkFrame(ventana_principal)
-frame_interruptor.pack(pady=5, padx=5)
-switch = ctk.CTkSwitch(frame_interruptor, text=None, variable=switch_var, command=condicional_interuptor, onvalue=0, offvalue=1)
+frame_switch = ctk.CTkFrame(ventana_principal)
+frame_switch.pack(pady=25, padx=5)
+switch = ctk.CTkSwitch(frame_switch, text=None, variable=switch_var, command=condicional_interuptor, onvalue=0, offvalue=1)
 switch.pack(pady=2, side="left")
-
 # Etiqueta para mostrar el estado
-label = ctk.CTkLabel(frame_interruptor, text="Con DNH", width=150, height=30)
+label = ctk.CTkLabel(frame_switch, text="Con DNH", width=150, height=30)
 label.pack(pady=2)
 
 
 # boton cotinuar
-frame_continuar = ctk.CTkFrame(ventana_principal)
-frame_continuar.pack(pady=5, padx=5)
-continuar = ctk.CTkButton(frame_continuar, text="Finalizar", command=lambda:main(fecha, entry_archivo))
-continuar.pack(pady=5, padx=5)
+frame_continuar = ctk.CTkFrame(ventana_principal, fg_color="#6A0DAD")
+frame_continuar.pack(pady=5, padx=5, side="bottom")
+continuar = ctk.CTkButton(frame_continuar, text="Finalizar", fg_color="#2C2F33",command=lambda:main(fecha, entry_archivo))
+continuar.pack(pady=2, padx=2)
 
 ventana_principal.mainloop()
 

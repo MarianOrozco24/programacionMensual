@@ -32,7 +32,6 @@ def obtencion_datos (df, indices_columnas):
             # id avaya
             avaya = df.loc[index, 'Avaya']
             horario = df.iloc[index, indices_columnas[0]]
-            print(f"Fila {index}: ID del asesor = {avaya}")
             Contador_index = Contador_index + 1
             contador = contador + 1
 
@@ -40,7 +39,7 @@ def obtencion_datos (df, indices_columnas):
             df_borrar.loc[contador, "Id Avaya"] = avaya
             df_borrar.loc[contador, "Horarios"] = horario
         
-    print(Contador_index)
+    print("Cantidad de asesores programados ",Contador_index)
     return df_borrar
 
             
