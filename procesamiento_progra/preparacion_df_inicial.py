@@ -33,7 +33,6 @@ def repeticion_valores(data, dias_semana):
             elif df.loc[i, "PCRC"] == "1L convergente cross":
                 df.loc[i, "PCRC"] = "1L CONVERGENTE CROSSELLING"
 
-        df["Nombre y Apellido"] = df["Nombre y Apellido"].replace(",", "")
     except Exception as e:
         mx.showerror("Repeticion valores", f"Se produjo un error en la funcion que se encarga de coloca los valores iniciales en el df principal. Error: {e}")
     # Devolvemos el dataframe

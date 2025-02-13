@@ -80,6 +80,6 @@ def procesamiento_dotacion (fecha_input, dotacion, dimensionamiento):
             df_dotacion.loc[index, "LIDER"] = Config.coordinador_operacion
     return df_dotacion
 
-    # Dia Domingo
+
 
 

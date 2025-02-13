@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime
+from tkinter import messagebox as mx
 def filtrado_de_columnas (df, dias_semana):
     # Necesitamos tratar el input dias_semana
     dias_semana = dias_semana.replace("/", "-")
@@ -13,33 +14,37 @@ def filtrado_de_columnas (df, dias_semana):
 
 
 def obtencion_datos (df, indices_columnas):
-    # creamos un df para almacenar los datos obtenidos
-    df_borrar = pd.DataFrame(columns=["Id Avaya","Horarios"])
+    try:
+        # creamos un df para almacenar los datos obtenidos
+        df_borrar = pd.DataFrame(columns=["Id Avaya","Horarios"])
 
-    # Creamos un contador para poder indicar en que indice del df colocaremos los datos
-    contador = 0
+        # Creamos un contador para poder indicar en que indice del df colocaremos los datos
+        contador = 0
 
-    Contador_index = 0 # Creamos este contador para corroborar la cantidad de asesores que trabajan los dias no habiles
+        Contador_index = 0 # Creamos este contador para corroborar la cantidad de asesores que trabajan los dias no habiles
 
-    # Recorremos toda la columna para ver que valores no son nulos y en caso de encontrar un valor no nulo, obtenemos el id del asesor
-    for index in df.index:
+        # Recorremos toda la columna para ver que valores no son nulos y en caso de encontrar un valor no nulo, obtenemos el id del asesor
+        for index in df.index:
 
-        # Extraer las columnas de interés para esta fila
-        valores = df.iloc[index, indices_columnas]
+            # Extraer las columnas de interés para esta fila
+            valores = df.iloc[index, indices_columnas]
 
-        # Verificar si hay al menos un valor no nulo
-        if valores.notna().any():  # .notna() identifica los valores no nulos
-            # id avaya
-            avaya = df.loc[index, 'Avaya']
-            horario = df.iloc[index, indices_columnas[0]]
-            Contador_index = Contador_index + 1
-            contador = contador + 1
+            # Verificar si hay al menos un valor no nulo
+            if valores.notna().any():  # .notna() identifica los valores no nulos
+                # id avaya
+                avaya = df.loc[index, 'Avaya']
+                horario = df.iloc[index, indices_columnas[0]]
+                Contador_index = Contador_index + 1
+                contador = contador + 1
 
-            # Agregamos los datos al df
-            df_borrar.loc[contador, "Id Avaya"] = avaya
-            df_borrar.loc[contador, "Horarios"] = horario
+                # Agregamos los datos al df
+                df_borrar.loc[contador, "Id Avaya"] = avaya
+                df_borrar.loc[contador, "Horarios"] = horario
+            
+        print("Cantidad de asesores programados ",Contador_index)
+    except Exception as e:
+        mx.showerror("Obtencion de datos", f"Se produjo un error en la funcion obtencion de datos. La cual se encarga de realizar un df con los id de los asesores que trabajan los dias no habiles.Error: {e}")
         
-    print("Cantidad de asesores programados ",Contador_index)
     return df_borrar
 
             

@@ -61,8 +61,6 @@ def main(fecha_str, entry_archivo):
             colocacion_horarios(m[8], horarios_list, m)
 
   
-
-    
     # Establecemos que si el interruptorr esta encendido que se ejecute las funciones que completan con el DNH
     if Config.condicional_dnh == 0:
           
