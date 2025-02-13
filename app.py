@@ -15,7 +15,6 @@ from PIL import Image
 
 def main(fecha_str, entry_archivo):
     # Primero que nada vamos a procesar la dotacion para que no haya problemas con las vacaciones de los asesores
-
     dota = procesamiento_dotacion(fecha_str.get(),Config.ruta_dotacion, Config.ruta_dnh )
 
     # convertimos ese dato en fecha
