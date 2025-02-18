@@ -52,7 +52,6 @@ def procesamiento_dotacion (fecha_input, dotacion, dimensionamiento):
         # Dia Domingo
         columnas_filtradas = filtrado_de_columnas(df_dimensionamiento, dias_semana[1])
         df_borrar = obtencion_datos(df_dimensionamiento, columnas_filtradas)
-        df_borrar.to_excel("probadno.xlsx", index=False)
 
         # Recorremos el dataframe df_borrar buscando los asesores que tengan en su horario "vacaciones"
         for x in df_borrar.index:
@@ -72,7 +71,7 @@ def procesamiento_dotacion (fecha_input, dotacion, dimensionamiento):
     print("Cantidad de asesores de vacaciones: ",contador)
     ## Hay que arreglar los PCRC
     for index in df_dotacion.index:
-        if df_dotacion.loc[index, "SKILL"] == 861:
+        if df_dotacion.loc[index, "SKILL"] == 862:
             df_dotacion.loc[index, "PCRC"] = "CONTROL CARGA FIJA"
             df_dotacion.loc[index, "LIDER"] = Config.lider_BO
         elif df_dotacion.loc[index, "SKILL"] == 1160:
