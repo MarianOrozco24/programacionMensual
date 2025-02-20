@@ -72,7 +72,7 @@ def procesamiento_dotacion (fecha_input, dotacion, dimensionamiento):
     ## Hay que arreglar los PCRC
     for index in df_dotacion.index:
         if df_dotacion.loc[index, "SKILL"] == 862:
-            df_dotacion.loc[index, "PCRC"] = "CONTROL CARGA FIJA"
+            df_dotacion.loc[index, "PCRC"] = "CONTROL DE CARGA FIJA"
             df_dotacion.loc[index, "LIDER"] = Config.lider_BO
         elif df_dotacion.loc[index, "SKILL"] == 1160:
             df_dotacion.loc[index, "PCRC"] = "CLOOPERS"
